@@ -3,7 +3,7 @@
 This project implements functionality to estimate the join size between two tables in a database using statistical calculations. It includes a utility class `DBUtils` to perform the join estimation based on metadata about the tables and their attributes.
 
 ## Authors
-- Mike
+- Mike Kerr
 - Peter Buonaiuto
 - Manan Devani
 
