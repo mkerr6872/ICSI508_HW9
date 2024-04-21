@@ -1,6 +1,8 @@
 package ICSI508_HW9;
 
 import java.sql.*;
+import java.util.HashSet;
+import java.util.Set;
 
 
 public class dbUtils {
@@ -16,7 +18,6 @@ public class dbUtils {
 	protected void dbConnect() {
 		try {
 			this.conn = DriverManager.getConnection(this.url);
-			System.out.println(this.url);
 			this.st = this.conn.createStatement();
 		}
 		catch(SQLException e) {
@@ -30,10 +31,40 @@ public class dbUtils {
 			while (rs.next()) {
 				System.out.println(rs.getString(1));
 			}
-		} catch (SQLException e) {
+			rs.close();
+		} 
+		catch (SQLException e) {
 			e.printStackTrace();
 		}
 		
+	}
+	
+	public Set<String> getAttributes(String table) {
+		try {
+			ResultSet rs = this.st.executeQuery("SELECT * FROM " + table);
+			ResultSetMetaData rsmd = rs.getMetaData();
+			int attributeCount = rsmd.getColumnCount();
+			Set<String> attributeSet = new HashSet<String>();
+			
+			for (int i=1; i <= attributeCount; i++) {
+				attributeSet.add(rsmd.getColumnName(i));
+			}
+			return attributeSet;
+		} 
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
+		
+
+		
+	}
+	
+	public void estimateJoin(String table1, String table2) {
+		Set<String> attributeR = getAttributes(table1);
+		Set<String> attributeS = getAttributes(table2);
+		System.out.println(attributeR);
+		System.out.println(attributeS);
 	}
 	
 	

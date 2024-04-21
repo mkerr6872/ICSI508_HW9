@@ -9,8 +9,12 @@ public class demo {
 		}
 		
 		else {
-			dbUtils instance = new dbUtils(args[0]);
-			instance.actualJoin(args[1], args[2]);
+			String url = args[0];
+			String table1 = args[1];
+			String table2 = args[2];
+			dbUtils instance = new dbUtils(url);
+			//instance.actualJoin(table1, table2);
+			instance.estimateJoin(table1, table2);
 		}
 	
 	}
