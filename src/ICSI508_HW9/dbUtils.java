@@ -45,24 +45,24 @@ public class DBUtils {
 	private TableMetaData getComparisonData(String table1, String table2) {
 		try {
 			TableMetaData tableMD = new TableMetaData();	
-			ResultSet rs = this.st.executeQuery("SELECT * FROM " + table1);
-			ResultSetMetaData rsmd = rs.getMetaData();
+			DatabaseMetaData databaseMD = this.conn.getMetaData();
 			
 			// Getting attribute names
 			Set<String> attributeSet = new HashSet<String>();
-			int attributeCount = rsmd.getColumnCount();;
-			for (int i=1; i <= attributeCount; i++) {
-				attributeSet.add(rsmd.getColumnName(i));
+			ResultSet rsa = databaseMD.getColumns(null, null, table1, null);
+			while(rsa.next()) {
+				attributeSet.add(rsa.getString(4));
 			}
+			rsa.close();
 			tableMD.setAttributes(attributeSet);
 
 			// Getting primary keys
 			Set<String> primaryKeySet = new HashSet<String>();
-			DatabaseMetaData databaseMD = this.conn.getMetaData();
 			ResultSet rspk = databaseMD.getPrimaryKeys(null, null, table1);
 			while(rspk.next()) {
 				primaryKeySet.add(rspk.getString(4));
 			}
+			rspk.close();
 			tableMD.setPrimaryKeys(primaryKeySet);
 			
 			// Getting foreign keys referencing table2
@@ -73,8 +73,8 @@ public class DBUtils {
 					foreignKeySet.add(rsfk.getString(8));
 				}
 			}
+			rsfk.close();
 			tableMD.setForeignKeys(foreignKeySet);
-			
 			
 			return tableMD;
 		} 
@@ -84,15 +84,50 @@ public class DBUtils {
 		return null;
 	}
 	
+	private Integer getTupleCount(String table) {
+		try {
+			Integer tupleCount = 0;
+			ResultSet rs = this.st.executeQuery("SELECT COUNT(*) FROM " + table);
+			while (rs.next()) {
+				tupleCount = Integer.parseInt(rs.getString(1));
+			}
+			return tupleCount;
+		} 
+		catch (SQLException e) {
+			e.printStackTrace();
+		}	
+		return null;
+	}
+	
+	private Integer getDistinctTupleCountByAttribute(String table, String attribute) {
+		try {
+			Integer tupleCount = 0;
+			ResultSet rs = this.st.executeQuery("SELECT COUNT(DISTINCT " + attribute + ") FROM " + table);
+			while (rs.next()) {
+				tupleCount = Integer.parseInt(rs.getString(1));
+			}
+			return tupleCount;
+		} 
+		catch (SQLException e) {
+			e.printStackTrace();
+		}	
+		return null;
+	}
+	
 	
 	public void estimateJoin(String table1, String table2) {
 		TableMetaData table1MD = getComparisonData(table1, table2);
 		TableMetaData table2MD = getComparisonData(table2, table1);
 		
+		//System.out.println(getTupleCount(table2));
+		//System.out.println(getDistinctTupleCountByAttribute(table2, "year"));
 		
 		//System.out.println(table1MD.getAttributes());
 		//System.out.println(table1MD.getPrimaryKeys());
 		//System.out.println(table1MD.getForeignKeys());
+		//System.out.println(table2MD.getAttributes());
+		//System.out.println(table2MD.getPrimaryKeys());
+		//System.out.println(table2MD.getForeignKeys());
 
 	}
 	
