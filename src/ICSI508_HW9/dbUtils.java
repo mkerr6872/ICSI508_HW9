@@ -20,7 +20,7 @@ public class dbUtils {
 			this.st = this.conn.createStatement();
 		}
 		catch(SQLException e) {
-			System.out.println(e);
+			e.printStackTrace();
 		}
 	}
 	
