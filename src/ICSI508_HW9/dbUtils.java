@@ -5,17 +5,19 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-public class dbUtils {
-	String url;
-	Connection conn;
-	Statement st;
+public class DBUtils {
+	private String url;
+	private Connection conn;
+	private Statement st;
+	private Integer actualJoinCount;
+	private Integer estimatedJointCount;
 	
-	public dbUtils(String dbURL) {
+	public DBUtils(String dbURL) {
 		this.url = dbURL;
 		dbConnect();
 	}
 	
-	protected void dbConnect() {
+	private void dbConnect() {
 		try {
 			this.conn = DriverManager.getConnection(this.url);
 			this.st = this.conn.createStatement();
@@ -29,7 +31,8 @@ public class dbUtils {
 		try {
 			ResultSet rs = this.st.executeQuery("SELECT COUNT(*) FROM " + table1 + " NATURAL JOIN " + table2);
 			while (rs.next()) {
-				System.out.println(rs.getString(1));
+				this.actualJoinCount = Integer.parseInt(rs.getString(1));
+				System.out.println("Actual join count: " + this.actualJoinCount);
 			}
 			rs.close();
 		} 
@@ -39,32 +42,58 @@ public class dbUtils {
 		
 	}
 	
-	public Set<String> getAttributes(String table) {
+	private TableMetaData getComparisonData(String table1, String table2) {
 		try {
-			ResultSet rs = this.st.executeQuery("SELECT * FROM " + table);
+			TableMetaData tableMD = new TableMetaData();	
+			ResultSet rs = this.st.executeQuery("SELECT * FROM " + table1);
 			ResultSetMetaData rsmd = rs.getMetaData();
-			int attributeCount = rsmd.getColumnCount();
-			Set<String> attributeSet = new HashSet<String>();
 			
+			// Getting attribute names
+			Set<String> attributeSet = new HashSet<String>();
+			int attributeCount = rsmd.getColumnCount();;
 			for (int i=1; i <= attributeCount; i++) {
 				attributeSet.add(rsmd.getColumnName(i));
 			}
-			return attributeSet;
+			tableMD.setAttributes(attributeSet);
+
+			// Getting primary keys
+			Set<String> primaryKeySet = new HashSet<String>();
+			DatabaseMetaData databaseMD = this.conn.getMetaData();
+			ResultSet rspk = databaseMD.getPrimaryKeys(null, null, table1);
+			while(rspk.next()) {
+				primaryKeySet.add(rspk.getString(4));
+			}
+			tableMD.setPrimaryKeys(primaryKeySet);
+			
+			// Getting foreign keys referencing table2
+			Set<String> foreignKeySet = new HashSet<String>();
+			ResultSet rsfk = databaseMD.getImportedKeys(null, null, table1);
+			while(rsfk.next()) {
+				if (rsfk.getString(3).equals(table2)) {
+					foreignKeySet.add(rsfk.getString(8));
+				}
+			}
+			tableMD.setForeignKeys(foreignKeySet);
+			
+			
+			return tableMD;
 		} 
 		catch (SQLException e) {
 			e.printStackTrace();
 		}
 		return null;
-		
-
-		
 	}
 	
+	
 	public void estimateJoin(String table1, String table2) {
-		Set<String> attributeR = getAttributes(table1);
-		Set<String> attributeS = getAttributes(table2);
-		System.out.println(attributeR);
-		System.out.println(attributeS);
+		TableMetaData table1MD = getComparisonData(table1, table2);
+		TableMetaData table2MD = getComparisonData(table2, table1);
+		
+		
+		//System.out.println(table1MD.getAttributes());
+		//System.out.println(table1MD.getPrimaryKeys());
+		//System.out.println(table1MD.getForeignKeys());
+
 	}
 	
 	

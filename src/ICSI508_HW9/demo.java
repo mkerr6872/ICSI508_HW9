@@ -1,6 +1,6 @@
 package ICSI508_HW9;
 
-public class demo {
+public class Demo {
 
 	public static void main(String[] args) {
 		
@@ -12,8 +12,9 @@ public class demo {
 			String url = args[0];
 			String table1 = args[1];
 			String table2 = args[2];
-			dbUtils instance = new dbUtils(url);
-			//instance.actualJoin(table1, table2);
+			
+			DBUtils instance = new DBUtils(url);
+			instance.actualJoin(table1, table2);
 			instance.estimateJoin(table1, table2);
 		}
 	
