@@ -1,11 +1,13 @@
 package ICSI508_HW9;
 
+import java.sql.SQLException;
+
 public class Demo {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws SQLException {
 		
 		if (args.length != 3) {
-			System.out.println("Please add the url, table1, and table2 as command line arguments");
+			throw new IllegalArgumentException("Please add <url>, <table1name>, <table2name> as arguments to command line");
 		}
 		
 		else {
@@ -16,6 +18,8 @@ public class Demo {
 			DBUtils instance = new DBUtils(url);
 			instance.actualJoin(table1, table2);
 			instance.estimateJoin(table1, table2);
+			instance.calculateError();
+			instance.display(table1, table2);
 		}
 	
 	}

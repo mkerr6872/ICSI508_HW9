@@ -4,8 +4,11 @@ import java.util.Set;
 
 
 public class TableMetaData {
+	// Set of all column names in table
 	private Set<String> attributes;
+	// Set of all primary key names in table
 	private Set<String> primaryKeys;
+	// Set of foreign key names in table referencing another table
 	private Set<String> foreignKeys;
 	
 	public TableMetaData() {
